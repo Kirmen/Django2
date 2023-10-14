@@ -33,7 +33,7 @@ class PostAdmin(admin.ModelAdmin):
     list_display = ('id', 'title', 'slug', 'category', 'created_at', 'get_photo')
     list_display_links = ('id', 'title')
     search_fields = ('title',)
-    list_filter = ('category',)
+    list_filter = ('category', 'tags')
     readonly_fields = ('views',)  # можна get_photo та created_at, але вони й так не виводяться
 
     # save_as = True зберігти як новий об'єкт
