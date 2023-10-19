@@ -1,8 +1,7 @@
 from django.shortcuts import render
 from django.views.generic import ListView, DetailView
+from .models import Post, Category, Tag
 from django.db.models import F
-
-from blog.models import Post, Category, Tag
 
 
 class Home(ListView):
@@ -13,14 +12,14 @@ class Home(ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Kirmen'
+        context['title'] = 'Classic Blog Design'
         return context
 
 
-class PostByCategory(ListView):
+class PostsByCategory(ListView):
     template_name = 'blog/index.html'
     context_object_name = 'posts'
-    paginate_by = 3
+    paginate_by = 4
     allow_empty = False
 
     def get_queryset(self):
@@ -30,6 +29,22 @@ class PostByCategory(ListView):
         context = super().get_context_data(**kwargs)
         context['title'] = Category.objects.get(slug=self.kwargs['slug'])
         return context
+
+
+class PostsByTag(ListView):
+    template_name = 'blog/index.html'
+    context_object_name = 'posts'
+    paginate_by = 4
+    allow_empty = False
+
+    def get_queryset(self):
+        return Post.objects.filter(tags__slug=self.kwargs['slug'])
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Записи по тегу: ' + str(Tag.objects.get(slug=self.kwargs['slug']))
+        return context
+
 
 class GetPost(DetailView):
     model = Post
@@ -44,18 +59,17 @@ class GetPost(DetailView):
         return context
 
 
-class PostByTag(ListView):
-    template_name = 'blog/index.html'
+class Search(ListView):
+    template_name = 'blog/search.html'
     context_object_name = 'posts'
-    paginate_by = 2
-    allow_empty = False
+    paginate_by = 4
 
     def get_queryset(self):
-        return Post.objects.filter(tags__slug=self.kwargs['slug'])
+        return Post.objects.filter(title__icontains=self.request.GET.get('s'))
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Tag: ' + str(Tag.objects.get(slug=self.kwargs['slug']))
+        context['s'] = f"s={self.request.GET.get('s')}&"
         return context
 
 
